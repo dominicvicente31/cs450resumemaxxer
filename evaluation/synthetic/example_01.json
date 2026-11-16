@@ -1,0 +1,46 @@
+{
+  "job_description": "Software engineering intern. Build and test Python web services, write SQL queries, and collaborate with a small team using Git. Experience with REST APIs and data analysis is a plus.",
+  "resume": {
+    "contact": {
+      "name": "Sample Student",
+      "email": "sample.student@example.edu",
+      "phone": "555-0100",
+      "links": ["github.com/example"]
+    },
+    "education": [
+      {
+        "school": "Example State University",
+        "degree": "B.S. Computer Science",
+        "dates": "Aug 2023 - May 2027",
+        "details": "Relevant coursework: Data Structures, Databases"
+      }
+    ],
+    "experience": [
+      {
+        "title": "Tutor",
+        "organization": "Campus Learning Center",
+        "dates": "Jan 2025 - Present",
+        "facts": [
+          "helped students with intro programming homework",
+          "about 10 students a week",
+          "made practice problems in python"
+        ],
+        "bullets": []
+      }
+    ],
+    "projects": [
+      {
+        "title": "Course Planner",
+        "organization": "Databases class project",
+        "dates": "Fall 2025",
+        "facts": [
+          "made a website to plan class schedules with 3 teammates",
+          "used flask and a sqlite database",
+          "we used git for the code"
+        ],
+        "bullets": []
+      }
+    ],
+    "skills": ["Python", "SQL", "Git"]
+  }
+}
