@@ -5,3 +5,11 @@ __pycache__/
 .env
 .streamlit/secrets.toml
 evaluation/results.csv
+
+# Fetched data and trained models stay local; see data/README.md.
+data/job_postings/*
+data/resumes/*
+models/*
+!data/job_postings/.gitkeep
+!data/resumes/.gitkeep
+!models/.gitkeep
