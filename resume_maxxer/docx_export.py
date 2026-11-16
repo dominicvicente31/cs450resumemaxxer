@@ -1,7 +1,8 @@
 """Export a Resume to DOCX with one consistent layout (python-docx).
 
-Basic single-column template. Styling ideas:
-TODO: rule under section headings, tighter spacing, one-page check.
+Single-column template: plain paragraphs and real Word list items, no tables
+or text boxes, so applicant tracking systems can read it.
+TODO: warn when the resume runs past one page.
 TODO: offer more than one template.
 """
 
@@ -11,6 +12,8 @@ from io import BytesIO
 
 from docx import Document
 from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_TAB_ALIGNMENT
+from docx.oxml import OxmlElement
+from docx.oxml.ns import qn
 from docx.shared import Inches, Pt
 
 from resume_maxxer.models import Entry, Resume
@@ -21,8 +24,19 @@ NAME_SIZE = Pt(20)
 MARGIN = Inches(0.7)
 
 
+def _add_rule_below(paragraph) -> None:
+    """Thin line under the paragraph (python-docx has no API for borders)."""
+    borders = OxmlElement("w:pBdr")
+    bottom = OxmlElement("w:bottom")
+    for attribute, value in (("val", "single"), ("sz", "6"), ("space", "1"), ("color", "auto")):
+        bottom.set(qn(f"w:{attribute}"), value)
+    borders.append(bottom)
+    paragraph._p.get_or_add_pPr().append(borders)
+
+
 def _section_heading(doc, text: str) -> None:
     paragraph = doc.add_paragraph()
+    _add_rule_below(paragraph)  # before spacing, to keep Word's element order
     paragraph.paragraph_format.space_before = Pt(8)
     paragraph.paragraph_format.space_after = Pt(2)
     run = paragraph.add_run(text.upper())
