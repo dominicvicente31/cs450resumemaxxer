@@ -30,7 +30,7 @@ The app runs locally end to end. Both tabs work, a first version of every module
 | Job matching and training data | M1 to M6 | _unassigned_ | `similarity.py`, `train.py`, `data/` |
 | Draft parsing and DOCX template | T1 to T7 | _unassigned_ | `parser.py`, `docx_export.py` |
 | Web app | W1 to W7 | _unassigned_ | `app.py`, `ui/` |
-| Evaluation and integration | E1 to E8 | _unassigned_ | `evaluation/`, `metrics.py`, CI, report |
+| Evaluation and integration | E1 to E8 | Titus | `evaluation/`, `metrics.py`, CI, report |
 
 Everyone: branch from `main`, open a pull request, get one review from the person whose module you touch. Tests must pass without an API key.
 
