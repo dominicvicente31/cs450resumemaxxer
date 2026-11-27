@@ -1,0 +1,4 @@
+{
+  "job_description": "Frontend developer intern. Build accessible React interfaces, use JavaScript and CSS, and collaborate through Git and code review.",
+  "resume": {"contact": {"name": "Maya Chen", "email": "maya.chen@example.edu", "phone": "555-0103", "links": ["github.com/mayachen"]}, "education": [{"school": "Lakeview College", "degree": "B.A. Digital Media", "dates": "Aug 2023 - May 2027", "details": "Web design concentration"}], "experience": [], "projects": [{"title": "Campus Events Site", "organization": "Independent project", "dates": "2025", "facts": ["built pages with React", "styled components with CSS", "added keyboard navigation", "stored code in GitHub"], "bullets": []}], "skills": ["JavaScript", "React", "CSS", "Git"]}
+}

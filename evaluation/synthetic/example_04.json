@@ -1,0 +1,4 @@
+{
+  "job_description": "Cybersecurity analyst intern. Monitor alerts, document incidents, investigate suspicious activity, and use networking fundamentals.",
+  "resume": {"contact": {"name": "Alex Rivera", "email": "alex.rivera@example.edu", "phone": "555-0104", "links": []}, "education": [{"school": "Metro State", "degree": "B.S. Cybersecurity", "dates": "Jan 2024 - Dec 2027", "details": "Network security coursework"}], "experience": [{"title": "Help Desk Assistant", "organization": "Metro State IT", "dates": "Aug 2025 - Present", "facts": ["reset student passwords", "recorded support tickets", "escalated suspicious emails to supervisors"], "bullets": []}], "projects": [{"title": "Home Lab", "organization": "Security club", "dates": "Fall 2025", "facts": ["configured a small virtual network", "reviewed sample firewall logs", "wrote notes about common phishing signs"], "bullets": []}], "skills": ["Networking", "Linux", "Wireshark"]}
+}

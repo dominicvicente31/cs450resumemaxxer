@@ -1,0 +1,4 @@
+{
+  "job_description": "Data analyst intern. Clean spreadsheets, write SQL queries, build dashboards, and explain findings to business partners.",
+  "resume": {"contact": {"name": "Jordan Lee", "email": "jordan.lee@example.edu", "phone": "555-0102", "links": []}, "education": [{"school": "North Valley University", "degree": "B.S. Information Systems", "dates": "Aug 2024 - May 2028", "details": "Statistics and database coursework"}], "experience": [{"title": "Student Assistant", "organization": "University Library", "dates": "Sep 2025 - Present", "facts": ["organized circulation records", "answered questions from students", "used Excel filters and pivot tables"], "bullets": []}], "projects": [{"title": "Book Trends Report", "organization": "Analytics class", "dates": "Spring 2026", "facts": ["cleaned a small CSV dataset", "made charts in Tableau", "presented findings to the class"], "bullets": []}], "skills": ["SQL", "Excel", "Tableau"]}
+}
