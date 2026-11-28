@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
-import { IncompatibleFileError, evaluateResume } from "../api/client.js";
+import { IncompatibleFileError } from "../api/client.js";
 import { useUpload } from "../context/UploadContext.jsx";
 
 const STEPS = [
@@ -13,24 +13,26 @@ const STEPS = [
 
 export default function LoadingPage() {
   const navigate = useNavigate();
-  const { file, usePrimary, makePrimary, jobDescription, submitted, setSubmitted, setRejection, reset } = useUpload();
+  const { file, usePrimary, pending, setPending, setRejection, reset } = useUpload();
   const [step, setStep] = useState(0);
   const [error, setError] = useState("");
-  const controllerRef = useRef(null);
 
+  // The request was started by the Upload page; this only waits for it. Cleanup
+  // ignores a stale result instead of aborting, so React StrictMode's double
+  // mount in development doesn't cancel and resend the request.
   useEffect(() => {
-    if (!submitted) return;
-    const controller = new AbortController();
-    controllerRef.current = controller;
+    if (!pending) return;
+    let active = true;
     const ticker = setInterval(() => setStep((s) => Math.min(s + 1, STEPS.length - 1)), 700);
 
-    evaluateResume({ file, usePrimary, makePrimary, jobDescription }, controller.signal)
+    pending.promise
       .then((submission) => {
+        if (!active) return;
         navigate(`/results/${submission.id}`, { replace: true });
         reset();
       })
       .catch((err) => {
-        if (err.name === "AbortError") return;
+        if (!active || err.name === "AbortError") return;
         if (err instanceof IncompatibleFileError) {
           setRejection(err.message);
           navigate("/incompatible", { replace: true });
@@ -41,18 +43,16 @@ export default function LoadingPage() {
       .finally(() => clearInterval(ticker));
 
     return () => {
-      controller.abort();
+      active = false;
       clearInterval(ticker);
     };
-    // Run once per submit.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [submitted]);
+  }, [pending]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (!submitted && !error) return <Navigate to="/upload" replace />;
+  if (!pending && !error) return <Navigate to="/upload" replace />;
 
   const backToUpload = () => {
-    controllerRef.current?.abort();
-    setSubmitted(false);
+    pending?.controller.abort();
+    setPending(null);
     navigate("/upload");
   };
 

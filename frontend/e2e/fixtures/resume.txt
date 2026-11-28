@@ -1,0 +1,20 @@
+Jordan Lee
+jordan.lee@example.edu | 555-0102
+
+EDUCATION
+North Valley University, B.S. Information Systems, May 2028
+
+EXPERIENCE
+Student Assistant, University Library, Sep 2025 - Present
+- organized circulation records
+- answered questions from students
+- used Excel filters and pivot tables
+
+PROJECTS
+Book Trends Report, Analytics class, Spring 2026
+- cleaned a small CSV dataset
+- made charts in Tableau
+- presented findings to the class
+
+SKILLS
+SQL, Excel, Tableau

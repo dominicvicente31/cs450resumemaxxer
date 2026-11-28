@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import FilePreview from "../components/FilePreview.jsx";
 import {
   MIN_JOB_DESCRIPTION_CHARS,
+  evaluateResume,
   SUPPORTED_EXTENSIONS,
   jobDescriptionProblem,
   validateFile,
@@ -15,7 +16,7 @@ export default function UploadPage() {
   const {
     file, setFile, jobDescription, setJobDescription,
     usePrimary, setUsePrimary, makePrimary, setMakePrimary,
-    setSubmitted, setRejection,
+    setPending, setRejection,
   } = useUpload();
   const [primary, setPrimaryState] = useState(null);
   const [dragging, setDragging] = useState(false);
@@ -48,7 +49,10 @@ export default function UploadPage() {
         return;
       }
     }
-    setSubmitted(true);
+    const controller = new AbortController();
+    const promise = evaluateResume({ file, usePrimary, makePrimary, jobDescription }, controller.signal);
+    promise.catch(() => {}); // handled on the Loading page; this avoids an unhandled-rejection warning
+    setPending({ promise, controller });
     navigate("/loading");
   };
 

@@ -116,9 +116,9 @@ export default function HistoryPage() {
                     <Link to={`/results/${s.id}`}>{s.fileName}</Link>
                     {s.isPrimary && <span className="badge">Primary</span>}
                   </td>
-                  <td>{new Date(s.createdAt).toLocaleString()}</td>
-                  <td>{alignmentText(s.evaluation)}</td>
-                  <td>{Math.round(s.evaluation.clarityScore * 100)}%</td>
+                  <td data-label="Date">{new Date(s.createdAt).toLocaleString()}</td>
+                  <td data-label="Alignment">{alignmentText(s.evaluation)}</td>
+                  <td data-label="Clarity">{Math.round(s.evaluation.clarityScore * 100)}%</td>
                   <td className="row-actions">
                     <Link to={`/results/${s.id}`} className="button small">View</Link>
                     {!s.isPrimary && (
