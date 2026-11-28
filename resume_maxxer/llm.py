@@ -103,8 +103,14 @@ class LLMError(Exception):
     """The LLM call failed. The message is safe to show to the user."""
 
 
+PLACEHOLDER_KEY = "sk-ant-REPLACE_ME"  # the value shipped in .env.example
+
+
 def is_configured() -> bool:
-    return bool(os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("ANTHROPIC_AUTH_TOKEN"))
+    key = os.environ.get("ANTHROPIC_API_KEY", "").strip()
+    if key == PLACEHOLDER_KEY:
+        key = ""
+    return bool(key or os.environ.get("ANTHROPIC_AUTH_TOKEN"))
 
 
 def _model() -> str:
@@ -237,3 +243,124 @@ def structure_resume(resume_text: str) -> dict:
         return json.loads(reply)
     except json.JSONDecodeError as error:
         raise LLMError("The LLM reply was not in the expected format.") from error
+
+
+# --- alignment grading ---------------------------------------------------
+
+MIN_JOB_DESCRIPTION_CHARS = 50
+UNSCORABLE = -1
+# (upper bound, label) on the 0-100 alignment score; at or above the last bound is TOP.
+ALIGNMENT_BANDS = [(40, "Weak"), (70, "Fair")]
+ALIGNMENT_TOP_BAND = "Strong"
+
+ALIGNMENT_SYSTEM_PROMPT = (
+    "You grade how well a student's resume aligns with a specific job posting. "
+    "You are strict, consistent, and grade only on what the resume actually says. "
+    "Never assume skills or experience the resume does not state."
+)
+
+_ALIGNMENT_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "scorable": {"type": "boolean"},
+        "score": {"type": "integer"},
+        "matched_keywords": {"type": "array", "items": {"type": "string"}},
+        "missing_keywords": {"type": "array", "items": {"type": "string"}},
+        "summary": {"type": "string"},
+    },
+    "required": ["scorable", "score", "matched_keywords", "missing_keywords", "summary"],
+    "additionalProperties": False,
+}
+
+
+def job_description_problem(job_description: str) -> str | None:
+    """Why a job description is too thin to grade against, or None if it is usable."""
+    if len(job_description.strip()) < MIN_JOB_DESCRIPTION_CHARS:
+        return (
+            f"The job description must be at least {MIN_JOB_DESCRIPTION_CHARS} characters "
+            "so the resume can be graded against real requirements."
+        )
+    return None
+
+
+def alignment_band(score: int) -> str | None:
+    if score == UNSCORABLE:
+        return None
+    for upper_bound, label in ALIGNMENT_BANDS:
+        if score < upper_bound:
+            return label
+    return ALIGNMENT_TOP_BAND
+
+
+def _unscorable(reason: str) -> dict:
+    return {
+        "score": UNSCORABLE,
+        "band": None,
+        "matchedKeywords": [],
+        "missingKeywords": [],
+        "summary": reason,
+    }
+
+
+def score_alignment(resume_text: str, job_description: str) -> dict:
+    """Grade resume-to-job alignment with the model, 0 to 100.
+
+    Scores on the posting's keywords (skills, tools, qualifications) and on how
+    well the resume ties those keywords to real experience that meets the
+    posting's expectations. Returns score -1 (UNSCORABLE) with a reason in
+    `summary` whenever it cannot grade: no API key, job description under
+    MIN_JOB_DESCRIPTION_CHARS, empty resume, the model judging the input
+    ungradable, or an LLM failure. Never raises LLMError.
+
+    Returns {"score", "band", "matchedKeywords", "missingKeywords", "summary"}.
+    """
+    if problem := job_description_problem(job_description):
+        return _unscorable(problem)
+    if not resume_text.strip():
+        return _unscorable("The resume has no text to grade.")
+    if not is_configured():
+        return _unscorable("No Anthropic API key is set, so alignment could not be graded.")
+
+    prompt = (
+        "Grade how well the resume below aligns with the job posting.\n\n"
+        f"<resume>\n{resume_text.strip()}\n</resume>\n"
+        f"<job_posting>\n{job_description.strip()}\n</job_posting>\n\n"
+        "Steps:\n"
+        "1. List the posting's key requirements as short keywords: hard skills, "
+        "tools, technologies, qualifications, and core responsibilities. Skip "
+        "generic traits like 'team player' or 'hard working'.\n"
+        "2. For each keyword, decide whether the resume shows it. Count synonyms "
+        "and clear equivalents (for example 'PostgreSQL' for 'SQL'). Put each in "
+        "matched_keywords or missing_keywords, using the posting's wording.\n"
+        "3. Score 0 to 100 with this rubric:\n"
+        "   - Keyword coverage (40 points): share of key requirements the resume shows.\n"
+        "   - Evidence (40 points): matched keywords are tied to concrete experience, "
+        "projects, or coursework with outcomes, not just listed under Skills.\n"
+        "   - Fit to expectations (20 points): the experience level, responsibilities, "
+        "and domain match what the posting expects.\n"
+        "4. summary: two or three sentences on the biggest strengths and gaps, "
+        "addressed to the student.\n\n"
+        "Set scorable to false, score to -1, and explain why in summary if the "
+        "resume is not a resume, the posting is not a job posting, or either is "
+        "too vague or garbled to grade fairly."
+    )
+    try:
+        data = json.loads(_complete(prompt, system=ALIGNMENT_SYSTEM_PROMPT, schema=_ALIGNMENT_SCHEMA))
+        scorable, score = bool(data["scorable"]), int(data["score"])
+        matched, missing = list(data["matched_keywords"]), list(data["missing_keywords"])
+        summary = str(data["summary"]).strip()
+    except LLMError as error:
+        return _unscorable(f"Alignment could not be graded: {error}")
+    except (json.JSONDecodeError, KeyError, TypeError, ValueError):
+        return _unscorable("Alignment could not be graded: the reply was not in the expected format.")
+
+    if not scorable or score < 0:
+        return _unscorable(summary or "The model could not grade this resume against the posting.")
+    score = min(score, 100)
+    return {
+        "score": score,
+        "band": alignment_band(score),
+        "matchedKeywords": matched,
+        "missingKeywords": missing,
+        "summary": summary,
+    }

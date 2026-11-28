@@ -8,14 +8,17 @@ bullets. Each case is a JSON file in evaluation/synthetic/ (see
 example_01.json for the format). Results go to evaluation/results.csv and a
 summary is printed.
 
-Metrics (all 0.0 to 1.0):
+Metrics (0.0 to 1.0 unless noted):
+- alignment: llm.score_alignment, the model's 0-100 grade of keyword coverage
+  and how well those keywords are backed by experience. -1 when it cannot
+  grade (for example, no API key); -1 rows are left out of the mean.
 - relevance: TF-IDF cosine similarity with the case's job description
 - clarity: metrics.resume_clarity, share of rule-based checks passed
 - factual_accuracy: share of "after" bullets with no number or named term
   missing from the entry's facts (factcheck.py)
 
-TODO: write the other 19 synthetic resumes (vary major, experience level,
-      and how messy the facts are). Do not use real people's resumes.
+Every case's job description must be at least llm.MIN_JOB_DESCRIPTION_CHARS
+characters; shorter ones fail the run so they get fixed.
 """
 
 from __future__ import annotations
@@ -30,6 +33,10 @@ from resume_maxxer.models import Resume
 
 SYNTHETIC_DIR = Path(__file__).parent / "synthetic"
 RESULTS_PATH = Path(__file__).parent / "results.csv"
+
+
+def alignment(resume: Resume, job_description: str) -> int:
+    return llm.score_alignment(resume.to_text(), job_description)["score"]
 
 
 def relevance(resume: Resume, job_description: str) -> float:
@@ -52,6 +59,8 @@ def factual_accuracy(resume: Resume) -> float:
 def evaluate_case(path: Path) -> dict:
     case = json.loads(path.read_text(encoding="utf-8"))
     job_description = case["job_description"]
+    if problem := llm.job_description_problem(job_description):
+        raise ValueError(f"{path.name}: {problem}")
 
     before = Resume.from_dict(case["resume"])
     after = Resume.from_dict(case["resume"])
@@ -60,6 +69,8 @@ def evaluate_case(path: Path) -> dict:
 
     return {
         "case": path.stem,
+        "alignment_before": alignment(before, job_description),
+        "alignment_after": alignment(after, job_description),
         "relevance_before": relevance(before, job_description),
         "relevance_after": relevance(after, job_description),
         "clarity_before": metrics.resume_clarity(before),
@@ -69,8 +80,17 @@ def evaluate_case(path: Path) -> dict:
 
 
 def summarize(rows: list[dict]) -> dict:
-    """Mean of every metric column across cases."""
-    return {key: mean(row[key] for row in rows) for key in rows[0] if key != "case"}
+    """Mean of every metric column across cases. Unscorable alignment (-1) is
+    left out; a column with no scorable rows is reported as -1."""
+    summary = {}
+    for key in rows[0]:
+        if key == "case":
+            continue
+        values = [row[key] for row in rows]
+        if key.startswith("alignment"):
+            values = [v for v in values if v != llm.UNSCORABLE]
+        summary[key] = mean(values) if values else llm.UNSCORABLE
+    return summary
 
 
 def main() -> None:

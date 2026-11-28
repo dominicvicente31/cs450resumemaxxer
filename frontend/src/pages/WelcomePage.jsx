@@ -2,16 +2,16 @@ import { Link } from "react-router-dom";
 
 const FEATURES = [
   {
-    title: "Job match",
-    body: "Paste a job posting and see how closely your resume matches it, plus the keywords you're missing.",
-  },
-  {
-    title: "Writing advice",
-    body: "Get specific suggestions on wording, structure, and what recruiters look for.",
+    title: "Job alignment",
+    body: "Paste a job posting and get a 0-100 grade on how well your resume covers its keywords and backs them up with real experience.",
   },
   {
     title: "Rewritten bullets",
-    body: "See each bullet rewritten next to your original. Anything we can't trace to your resume is flagged.",
+    body: "See each bullet rewritten next to your original, with writing advice. Anything we can't trace to your resume is flagged.",
+  },
+  {
+    title: "Primary resume and history",
+    body: "Save your main resume once and check it against new postings. Your last 30 evaluations are kept so you can compare drafts.",
   },
 ];
 
@@ -21,7 +21,7 @@ export default function WelcomePage() {
       <h1>Turn your coursework and early experience into a resume that gets read.</h1>
       <p className="lede">
         Resume Maxxer reviews your resume for students and recent graduates. Upload a draft and
-        get a clarity score, a job match score, and rewritten bullets that stay true to what you
+        get an alignment grade, a clarity score, and rewritten bullets that stay true to what you
         actually did.
       </p>
       <div className="feature-grid">
