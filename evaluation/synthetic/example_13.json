@@ -1,0 +1,4 @@
+{
+  "job_description": "Machine learning intern. Prepare datasets, train baseline models, evaluate results, and explain limitations responsibly.",
+  "resume": {"contact": {"name": "Lucas Garcia", "email": "lucas.garcia@example.edu", "phone": "555-0113", "links": []}, "education": [{"school": "Summit University", "degree": "B.S. Applied Mathematics", "dates": "Aug 2023 - May 2027", "details": "Machine learning coursework"}], "experience": [], "projects": [{"title": "House Price Model", "organization": "Machine learning class", "dates": "Fall 2025", "facts": ["removed missing values from a public dataset", "trained a linear regression baseline", "compared predicted and actual prices", "described limitations in the report"], "bullets": []}], "skills": ["Python", "pandas", "scikit-learn"]}
+}

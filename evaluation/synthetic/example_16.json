@@ -1,0 +1,4 @@
+{
+  "job_description": "Financial technology intern. Analyze transactions, write reliable code, protect sensitive information, and communicate quantitative results.",
+  "resume": {"contact": {"name": "Isabella Anderson", "email": "isabella.anderson@example.edu", "phone": "555-0116", "links": []}, "education": [{"school": "Franklin College", "degree": "B.S. Computer Science and Economics", "dates": "Aug 2023 - May 2027", "details": "Financial computing"}], "experience": [{"title": "Cashier", "organization": "Campus Market", "dates": "Sep 2024 - Present", "facts": ["processed customer purchases", "balanced the register at closing", "protected customer payment information"], "bullets": []}], "projects": [{"title": "Budget Tracker", "organization": "Personal project", "dates": "2025", "facts": ["built a Python tool for monthly expenses", "stored records in SQLite", "added a category summary"], "bullets": []}], "skills": ["Python", "SQL", "SQLite"]}
+}

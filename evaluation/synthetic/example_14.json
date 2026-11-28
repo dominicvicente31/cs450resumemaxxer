@@ -1,0 +1,4 @@
+{
+  "job_description": "IT support intern. Troubleshoot hardware and software, communicate with users, manage tickets, and follow security procedures.",
+  "resume": {"contact": {"name": "Sophia Taylor", "email": "sophia.taylor@example.edu", "phone": "555-0114", "links": []}, "education": [{"school": "Westfield University", "degree": "B.S. Information Technology", "dates": "Jan 2025 - Dec 2028", "details": "Networking concentration"}], "experience": [{"title": "Computer Lab Monitor", "organization": "Westfield University", "dates": "Aug 2025 - Present", "facts": ["helped users troubleshoot printer problems", "logged incidents in a ticket system", "followed a checklist before replacing equipment"], "bullets": []}], "projects": [], "skills": ["Windows", "Networking", "Troubleshooting"]}
+}
