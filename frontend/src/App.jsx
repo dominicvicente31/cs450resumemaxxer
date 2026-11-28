@@ -6,11 +6,14 @@ import IncompatiblePage from "./pages/IncompatiblePage.jsx";
 import LoadingPage from "./pages/LoadingPage.jsx";
 import ResultsPage from "./pages/ResultsPage.jsx";
 import HistoryPage from "./pages/HistoryPage.jsx";
+import PromptsPage from "./pages/PromptsPage.jsx";
 
 /**
  * Flow:  /  ->  /upload  ->  /incompatible (back to /upload)
  *                        ->  /loading  ->  /results/:id  (back to /)
  * Separate: /history lists past submissions; each opens /results/:id.
+ *           /prompts lists saved job descriptions; "Use" fills /upload.
+ * Both are saved only in this browser.
  */
 export default function App() {
   return (
@@ -22,6 +25,7 @@ export default function App() {
         <Route path="/loading" element={<LoadingPage />} />
         <Route path="/results/:id" element={<ResultsPage />} />
         <Route path="/history" element={<HistoryPage />} />
+        <Route path="/prompts" element={<PromptsPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>

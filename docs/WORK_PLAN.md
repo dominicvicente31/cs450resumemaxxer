@@ -2,7 +2,7 @@
 
 The project split into five areas, one per team member, with the stories for each area and when they are due.
 
-> **Nothing here is assigned yet.** Each of us picks one area; write your name in the Owner column once the team agrees. The dates were filled in without the course deadline, so shift the weeks to match the real due date. The stories and their order still hold.
+> **Assigned so far:** Dominic Vicente (Backend API and React frontend) and Titus (Evaluation and integration). Each remaining area still needs an owner; write your name in the Owner column once the team agrees. The dates were filled in without the course deadline, so shift the weeks to match the real due date. The stories and their order still hold.
 
 ## Where the project stands (Nov 15, 2026)
 
@@ -31,6 +31,7 @@ The app runs locally end to end. Both tabs work, a first version of every module
 | Draft parsing and DOCX template | T1 to T7 | _unassigned_ | `parser.py`, `docx_export.py` |
 | Web app | W1 to W7 | _unassigned_ | `app.py`, `ui/` |
 | Evaluation and integration | E1 to E8 | Titus | `evaluation/`, `metrics.py`, CI, report |
+| Backend API and React frontend | B1 to B8 | Dominic Vicente | `api.py`, `evaluate.py`, `frontend/` |
 
 Everyone: branch from `main`, open a pull request, get one review from the person whose module you touch. Tests must pass without an API key.
 
@@ -107,6 +108,21 @@ Everyone: branch from `main`, open a pull request, get one review from the perso
 
 ---
 
+## Backend API and React frontend
+
+**Owner: Dominic Vicente.** A React (Vite) frontend in `frontend/` talks to a FastAPI server in `resume_maxxer/api.py`. The server reuses the existing modules through one pipeline (`resume_maxxer/evaluate.py`) and is stateless: submission history, the primary resume, and saved job descriptions are kept in each user's browser (localStorage), so there is no database and no one sees anyone else's history. The Anthropic key stays on the server in `.env`; the browser never sees it. Run with `uvicorn resume_maxxer.api:app --port 8000` and `npm run dev` in `frontend/`.
+
+| # | Week | Story | Done when | Status |
+| --- | --- | --- | --- | --- |
+| B1 | 2 | As a student, I go from a welcome page to an upload, a loading screen, and my results, and a bad file sends me back to upload with the reason. | Welcome, Upload, Incompatible, Loading and Results pages, with a demo mode that runs without the backend. | Done (Nov 26) |
+| B2 | 2 | As a student, I can check the file I picked before sending it. | The Upload page previews .pdf (browser viewer), .txt and .docx (text extracted in the browser) in a panel that expands to a full window. | Done (Nov 27) |
+| B3 | 2 | As a student, I get one grade for how well my resume fits the job. | `llm.score_alignment` grades 0-100 on keyword coverage (40), evidence behind those keywords (40), and fit to the posting's expectations (20), and lists matched and missing keywords. It returns -1 when it cannot grade (no key, thin posting, ungradable input, LLM error). TF-IDF overlap is still shown as a secondary number. | Done (Nov 27) |
+| B4 | 2 | As a student, I'm graded against a real posting, not a one-liner. | Job descriptions under 50 characters are refused in the UI (live counter) and by the API (400) and the pipeline. | Done (Nov 27) |
+| B5 | 2 | As a student, I can look back at my earlier evaluations, and no one else can. | The last 30 submissions are kept on my device; past 30 the oldest drafts are removed automatically. History page with view, delete, and "Scrap older drafts" (keep the newest N). | Done (Nov 27) |
+| B6 | 2 | As a student, I can save my main resume once and check it against new jobs. | One submission can be the primary resume. It is never removed automatically, and the Upload page can evaluate it against a new posting without uploading again. | Done (Nov 27) |
+| B8 | 2 | As a student, I can reuse or tweak a job description I pasted before. | Every job description used is saved on my device (30 max, same text stored once). A Prompts page lists them with search, Use (fills the upload form), Edit, Delete, and New. | Done (Nov 27) |
+| B7 | 3 | As a presenter, the React app works end to end with the real key. | Walk through every page in a browser with the backend and a real key, including a bad file, a short job description, the 30 limit, the primary resume, and saved prompts. Every bug filed. | To do |
+
 ## Where the work crosses over
 
 - **`Resume` in `models.py` is shared by everything.** Announce any field change before making it (T3 is the one planned change).
@@ -114,6 +130,7 @@ Everyone: branch from `main`, open a pull request, get one review from the perso
 - **Matching and evaluation:** retraining changes every relevance score, so the vectorizer is frozen at the Nov 29 feature freeze.
 - **Parsing and web app:** parser failures surface in the Improve tab. Agree on what the user sees when a draft cannot be split into sections.
 - **LLM and web app:** W3 (regenerate one bullet) needs a per-bullet function in `llm.py`.
+- **Backend and everyone:** the React app shows whatever `evaluate.py` returns. Renaming or removing a field there means updating the `Evaluation` typedef in `frontend/src/api/client.js` and the Results page.
 
 ## Risks
 
@@ -124,3 +141,15 @@ Everyone: branch from `main`, open a pull request, get one review from the perso
 | Not enough job postings, or terms forbid using them | Untrained scoring still works. Report it as a limitation rather than scraping against terms. |
 | The before/after difference is small | Report it honestly. The human ratings (E3, E4) say more than the automatic scores. |
 | Short week 2 | Feature freeze on Nov 29 holds even if a story slips. Unfinished stories move to stretch. |
+
+## Contributions outside the owner's area
+
+Work a teammate did in an area they don't own, so credit is clear in the report.
+
+**Dominic Vicente**
+
+- **Whole project (before areas were split):** wrote the project skeleton and the first version of every module: the LLM prompts, parser, TF-IDF matching, clarity metric, fact guard, DOCX export, the Streamlit app, the evaluation script, and this work plan.
+- **LLM and truthfulness:** added `llm.score_alignment` (the model-graded alignment score, -1 when unscorable) and its rubric prompt. Made `llm.is_configured` ignore the `.env.example` placeholder key, so copying the file without editing it doesn't break the app.
+- **Job matching:** set the 50-character minimum for job descriptions (`llm.MIN_JOB_DESCRIPTION_CHARS`). Kept the TF-IDF score as a secondary "wording overlap" number next to the model grade.
+- **Evaluation and integration:** added `alignment_before` and `alignment_after` columns to `evaluation/run_eval.py` (-1 rows left out of the mean), and made the run fail on a job description under 50 characters. Added `tests/test_backend.py` (alignment grading, pipeline, API).
+- **Web app:** built the React frontend as a replacement path for the Streamlit UI. The Streamlit app itself is unchanged and still uses TF-IDF only.

@@ -1,33 +1,32 @@
 import { useEffect, useRef, useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { IncompatibleFileError, evaluateResume } from "../api/client.js";
-import { saveSubmission } from "../history/historyStore.js";
 import { useUpload } from "../context/UploadContext.jsx";
 
 const STEPS = [
-  "Reading your file",
+  "Reading your resume",
+  "Grading alignment with the job",
   "Splitting it into sections",
-  "Scoring clarity and job match",
-  "Rewriting bullets",
+  "Rewriting and fact-checking bullets",
+  "Scoring clarity",
 ];
 
 export default function LoadingPage() {
   const navigate = useNavigate();
-  const { file, jobDescription, setRejection, reset } = useUpload();
+  const { file, usePrimary, makePrimary, jobDescription, submitted, setSubmitted, setRejection, reset } = useUpload();
   const [step, setStep] = useState(0);
   const [error, setError] = useState("");
   const controllerRef = useRef(null);
 
   useEffect(() => {
-    if (!file) return;
+    if (!submitted) return;
     const controller = new AbortController();
     controllerRef.current = controller;
     const ticker = setInterval(() => setStep((s) => Math.min(s + 1, STEPS.length - 1)), 700);
 
-    evaluateResume(file, jobDescription, controller.signal)
-      .then(async (evaluation) => {
-        const saved = await saveSubmission({ fileName: file.name, jobDescription, evaluation });
-        navigate(`/results/${saved.id}`, { replace: true });
+    evaluateResume({ file, usePrimary, makePrimary, jobDescription }, controller.signal)
+      .then((submission) => {
+        navigate(`/results/${submission.id}`, { replace: true });
         reset();
       })
       .catch((err) => {
@@ -45,14 +44,15 @@ export default function LoadingPage() {
       controller.abort();
       clearInterval(ticker);
     };
-    // Run once per file.
+    // Run once per submit.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [file]);
+  }, [submitted]);
 
-  if (!file) return <Navigate to="/upload" replace />;
+  if (!submitted && !error) return <Navigate to="/upload" replace />;
 
-  const cancel = () => {
+  const backToUpload = () => {
     controllerRef.current?.abort();
+    setSubmitted(false);
     navigate("/upload");
   };
 
@@ -63,7 +63,7 @@ export default function LoadingPage() {
         <h1>Evaluation failed</h1>
         <p>{error}</p>
         <div className="actions">
-          <button className="button primary" onClick={() => navigate("/upload")}>Back to upload</button>
+          <button className="button primary" onClick={backToUpload}>Back to upload</button>
         </div>
       </section>
     );
@@ -72,14 +72,14 @@ export default function LoadingPage() {
   return (
     <section className="narrow center">
       <div className="spinner" aria-label="Loading" />
-      <h1>Evaluating {file.name}</h1>
+      <h1>Evaluating {usePrimary ? "your primary resume" : file?.name}</h1>
       <ol className="steps">
         {STEPS.map((label, i) => (
           <li key={label} className={i < step ? "done" : i === step ? "active" : ""}>{label}</li>
         ))}
       </ol>
       <div className="actions">
-        <button className="button" onClick={cancel}>Cancel</button>
+        <button className="button" onClick={backToUpload}>Cancel</button>
       </div>
     </section>
   );
