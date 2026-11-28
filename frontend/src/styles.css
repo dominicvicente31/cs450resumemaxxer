@@ -275,3 +275,27 @@ textarea[aria-invalid="true"] { border-color: var(--danger); }
   background: var(--surface); color: var(--text); font: inherit; font-weight: 600;
 }
 .field-help.ok { color: var(--success); }
+
+/* --- Writing advice markdown --- */
+.markdown { display: grid; gap: 0.6rem; }
+.markdown > * { margin: 0; }
+.markdown h3 { font-size: 1rem; margin-top: 0.4rem; }
+.markdown ul, .markdown ol { padding-left: 1.3rem; display: grid; gap: 0.4rem; }
+.markdown blockquote { border-left: 3px solid var(--border); padding-left: 0.75rem; color: var(--muted); }
+.markdown code { font: 0.85em ui-monospace, SFMono-Regular, Consolas, monospace; background: var(--bg); padding: 0.1em 0.35em; border-radius: 4px; }
+
+/* --- History rows stack as cards on phones --- */
+@media (max-width: 640px) {
+  .table-wrap { overflow: visible; background: transparent; border: 0; }
+  table.history, .history tbody, .history tr, .history td { display: block; width: 100%; }
+  .history thead { display: none; }
+  .history tr {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 0.75rem 1rem; margin-bottom: 0.75rem;
+  }
+  .history td { border: 0; padding: 0.2rem 0; white-space: normal; }
+  .history td:first-child { font-weight: 600; padding-bottom: 0.4rem; }
+  .history td[data-label]::before { content: attr(data-label) ": "; color: var(--muted); font-size: 0.85rem; }
+  .history .row-actions { justify-content: flex-start; flex-wrap: wrap; padding-top: 0.6rem; }
+}
+.markdown li blockquote { margin: 0.35rem 0 0; }

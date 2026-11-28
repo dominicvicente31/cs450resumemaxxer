@@ -137,8 +137,8 @@ Everyone: branch from `main`, open a pull request, get one review from the perso
 | B5 | 2 | As a student, I can look back at my earlier evaluations, and no one else can. | The last 30 submissions are kept on my device; past 30 the oldest drafts are removed automatically. History page with view, delete, and "Scrap older drafts" (keep the newest N). | Done (Nov 27) |
 | B6 | 2 | As a student, I can save my main resume once and check it against new jobs. | One submission can be the primary resume. It is never removed automatically, and the Upload page can evaluate it against a new posting without uploading again. | Done (Nov 27) |
 | B7 | 2 | As a student, I can reuse or tweak a job description I pasted before. | Every job description used is saved on my device (30 max, same text stored once). A Prompts page lists them with search, Use (fills the upload form), Edit, Delete, and New. | Done (Nov 27) |
-| B8 | 3 | As a presenter, the React app works end to end with the real key. | Every page walked through in a browser with the backend and a real key, including a bad file, a short job description, the 30 limit, the primary resume, and saved prompts. Every bug filed and the blocking ones fixed. | To do |
-| B9 | 2 | As the team, a broken frontend can't be merged. | CI also runs `npm ci` and `npm run build` in `frontend/` on every pull request. | To do |
+| B8 | 3 | As a presenter, the React app works end to end with the real key. | Every page walked through in a browser with the backend and a real key, including a bad file, a short job description, the 30 limit, the primary resume, and saved prompts. Every bug filed and the blocking ones fixed. Automated as `npm run e2e` (35 checks in `frontend/e2e/walkthrough.mjs`). | Without a key: done (Nov 28), 35/35 pass, 5 bugs fixed. With a real key: run `E2E_EXPECT_KEY=1 npm run e2e` once a key is in `.env`. |
+| B9 | 2 | As the team, a broken frontend can't be merged. | CI also runs `npm ci` and `npm run build` in `frontend/` on every pull request. | Done (Nov 28) |
 
 ## Where the work crosses over
 

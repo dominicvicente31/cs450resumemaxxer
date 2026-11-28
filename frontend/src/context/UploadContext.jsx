@@ -8,14 +8,16 @@ export function UploadProvider({ children }) {
   const [jobDescription, setJobDescription] = useState("");
   const [usePrimary, setUsePrimary] = useState(false); // evaluate the saved primary instead of a file
   const [makePrimary, setMakePrimary] = useState(false); // save this upload as the primary resume
-  const [submitted, setSubmitted] = useState(false); // Loading page only runs after a submit
+  // The in-flight evaluation, started once by the Upload page: { promise, controller } or null.
+  // The Loading page only waits on it, so re-rendering or re-mounting never sends a second request.
+  const [pending, setPending] = useState(null);
   const [rejection, setRejection] = useState(""); // why the last file was incompatible
 
   const reset = () => {
     setFile(null);
     setUsePrimary(false);
     setMakePrimary(false);
-    setSubmitted(false);
+    setPending(null);
     setRejection("");
   };
 
@@ -26,7 +28,7 @@ export function UploadProvider({ children }) {
         jobDescription, setJobDescription,
         usePrimary, setUsePrimary,
         makePrimary, setMakePrimary,
-        submitted, setSubmitted,
+        pending, setPending,
         rejection, setRejection,
         reset,
       }}

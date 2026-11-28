@@ -43,6 +43,19 @@ npm run dev               # http://localhost:5173
 - **Saved job descriptions:** at most 30, least recently used removed first. Each one used in an evaluation is saved automatically; the same text is stored once.
 - **File size:** up to 5 GB. Large `.txt` files preview only their first 256 KB; `.docx` over 50 MB isn't previewed.
 
+## End-to-end walkthrough
+
+`npm run e2e` drives the app in a headless browser and checks every page: upload validation, the Incompatible page, previews, results, download, the primary resume, the 30-submission limit, scrapping drafts, saved prompts, phone width, and dark mode. It uses a fresh browser profile, so your own history is untouched.
+
+```
+npx playwright install chromium        # once
+# with the API on :8000 and `npm run dev` on :5173:
+npm run e2e                            # no API key: expects alignment -1
+E2E_EXPECT_KEY=1 npm run e2e           # with a key in .env: expects a real grade and rewrites
+```
+
+Screenshots are saved to `e2e/shots/` (git-ignored). Fixtures are in `e2e/fixtures/`.
+
 ## Trying the edge cases in demo mode
 
 - A file with "corrupt" in its name: the backend rejects it, so you land on the Incompatible page.

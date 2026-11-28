@@ -1,22 +1,23 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useUpload } from "../context/UploadContext.jsx";
+import Markdown from "../components/Markdown.jsx";
 import ScoreCard from "../components/ScoreCard.jsx";
 import { UNSCORABLE, downloadRevised } from "../api/client.js";
 import { clearPrimary, getSubmission, setPrimary } from "../history/historyStore.js";
 
-/** Renders "- item" lines as a list and anything else as paragraphs. */
 function Advice({ text }) {
   if (!text?.trim()) return <p className="muted">No writing advice is available for this submission.</p>;
-  const lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
-  const items = lines.filter((l) => /^[-*]\s/.test(l)).map((l) => l.replace(/^[-*]\s+/, ""));
-  const paragraphs = lines.filter((l) => !/^[-*]\s/.test(l));
-  return (
-    <>
-      {paragraphs.map((p, i) => <p key={i}>{p}</p>)}
-      {items.length > 0 && <ul>{items.map((item, i) => <li key={i}>{item}</li>)}</ul>}
-    </>
-  );
+  return <Markdown text={text} />;
+}
+
+function clarityCaption(before, after) {
+  if (before == null) return "How direct and specific your bullets are";
+  const b = Math.round(before * 100);
+  const a = Math.round(after * 100);
+  if (a > b) return `Up from ${b}% in your original bullets`;
+  if (a < b) return `Down from ${b}% in your original bullets`;
+  return "Same as your original bullets";
 }
 
 function Chips({ items, kind }) {
@@ -98,11 +99,7 @@ export default function ResultsPage() {
         <ScoreCard
           label="Clarity"
           percent={ev.clarityScore * 100}
-          caption={
-            ev.clarityBefore != null
-              ? `Up from ${Math.round(ev.clarityBefore * 100)}% in your original bullets`
-              : "How direct and specific your bullets are"
-          }
+          caption={clarityCaption(ev.clarityBefore, ev.clarityScore)}
         />
         {ev.wordingMatch && (
           <ScoreCard
@@ -147,7 +144,11 @@ export default function ResultsPage() {
               <div key={i} className="bullet-row">
                 <div><span className="tag">Original</span>{b.original || <span className="muted">(none)</span>}</div>
                 <div>
-                  <span className="tag new">Revised</span>{b.revised || <span className="muted">(removed)</span>}
+                  {b.revised && b.revised === b.original ? (
+                    <><span className="tag">Revised</span><span className="muted">Unchanged</span></>
+                  ) : (
+                    <><span className="tag new">Revised</span>{b.revised || <span className="muted">(removed)</span>}</>
+                  )}
                   {b.flags.length > 0 && (
                     <div className="flag">Check: {b.flags.join(", ")} isn't in your original. Confirm it's true.</div>
                   )}
