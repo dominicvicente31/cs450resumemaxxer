@@ -4,23 +4,28 @@ The project is split into six areas, one per team member, with the stories for e
 
 > **Assigned so far:** Dominic Vicente (Backend API and React frontend) and Titus (Evaluation and integration). The other four areas still need owners; write your name in the Owner column once the team agrees. Unclaimed areas were re-scoped on Nov 27 to fit the React app, the model-graded alignment score, and history stored on each device (see "What changed on Nov 27"). The dates were filled in without the course deadline, so shift the weeks to match the real due date. The stories and their order still hold.
 
-## Where the project stands (Nov 27, 2026)
+## Where the project stands (Nov 28, 2026)
 
-The app runs locally end to end in two front ends: the original Streamlit app and a new React app backed by a FastAPI server. 38 tests pass without an API key.
+The app runs locally end to end: a React frontend backed by a FastAPI server. The original Streamlit app was retired on Nov 28. 35 backend tests and a 35-check browser walkthrough pass without an API key.
 
-- **Done:** 20 synthetic resumes for the test plan (E1). React app with upload preview, results, history, primary resume, and saved job descriptions (B1 to B7). Model-graded job alignment, 0-100 or -1 when it can't grade (B3).
-- **Still open:** the LLM code, including the new alignment grader, has **never been run against the real API**. Job matching is still **untrained** (no postings in `data/`). The clarity score, fact guard, alignment score, and score bands have **not been checked against human judgment**. No one has clicked through either app in a browser.
+- **Done:** 20 synthetic resumes for the test plan (E1). React app with upload preview, results, history, primary resume, and saved job descriptions (B1 to B7). Model-graded job alignment, 0-100 or -1 when it can't grade (B3). CI builds the frontend (B9). A 35-check browser walkthrough, `npm run e2e`, passes without a key (B8, real-key run still open).
+- **Still open:** the LLM code, including the new alignment grader, has **never been run against the real API**. Job matching is still **untrained** (no postings in `data/`). The clarity score, fact guard, alignment score, and score bands have **not been checked against human judgment**.
 
 ### What changed on Nov 27
 
 These changes affect several areas; the stories below already account for them.
 
-- **The React app (`frontend/`) is now the main front end.** It covers the "improve a draft" flow. The Streamlit app (`app.py`) stays as a fallback and is still the only place with the Create questionnaire.
+- **The React app (`frontend/`) is the main front end.** It covers the "improve a draft" flow.
 - **Job fit is graded by the model.** `llm.score_alignment` scores keyword coverage, the evidence behind those keywords, and fit to the posting. TF-IDF from `similarity.py` is now a secondary "wording overlap" number and the offline baseline.
 - **A job description is required, at least 50 characters**, everywhere: UI, API, pipeline, and evaluation cases.
 - **History stays on the user's device.** Submissions (30 max), the primary resume, and saved job descriptions live in the browser's localStorage. The server stores nothing, so there is no database.
 - **One pipeline.** `resume_maxxer/evaluate.py` runs every step for the API. Anything a student should see goes in its result; problems go in `evaluation.warnings`, which the Results page already shows.
 - **Uploads are capped at 5 GB.** Files are parsed in memory on the server.
+
+### What changed on Nov 28
+
+- **The Streamlit app is retired.** `app.py`, `resume_maxxer/ui/`, and their tests were removed; they're in git history before Nov 28. React is now the only front end.
+- **Creating a resume from scratch is gone for now.** The Create questionnaire lived only in Streamlit. The app now only improves an existing draft. This was the "creation" in the project's tagline, so either W8 gets an owner before the freeze or the presentation lists it as future work. `llm.draft_bullets` is kept: `run_eval.py` uses it and W8 will need it.
 
 ## Schedule
 
@@ -40,7 +45,7 @@ The week 1 checkpoint slipped: there has been no run with the real key yet. L1 a
 | LLM and truthfulness | L1 to L7 | _unassigned_ | `llm.py`, `factcheck.py` |
 | Job matching and training data | M1 to M7 | _unassigned_ | `similarity.py`, `train.py`, `data/` |
 | Draft parsing and DOCX template | T1 to T8 | _unassigned_ | `parser.py`, `docx_export.py` |
-| Web experience | W1 to W8 | _unassigned_ | `frontend/src/pages/`, `frontend/src/components/`, `app.py`, `ui/` |
+| Web experience | W1 to W8 | _unassigned_ | `frontend/src/pages/`, `frontend/src/components/` |
 | Evaluation and integration | E1 to E9 | Titus | `evaluation/`, `metrics.py`, CI, report |
 | Backend API and React frontend | B1 to B9 | Dominic Vicente | `api.py`, `evaluate.py`, `frontend/src/api/`, `frontend/src/history/`, `frontend/src/prompts/` |
 
@@ -54,7 +59,7 @@ Everyone: branch from `main`, open a pull request, get one review from the perso
 
 | # | Week | Story | Done when |
 | --- | --- | --- | --- |
-| L1 | 1 | As a teammate, I can set one key and have every LLM feature work. | All five `llm.py` functions have been run against the real API through both the Streamlit app and `POST /api/evaluate`, and any request errors fixed. The team has agreed how keys and cost are shared, and the README says so. |
+| L1 | 1 | As a teammate, I can set one key and have every LLM feature work. | All five `llm.py` functions have been run against the real API (four through `POST /api/evaluate`, `draft_bullets` through `run_eval.py`), and any request errors fixed. The team has agreed how keys and cost are shared, and the README says so. |
 | L2 | 1 | As a student, my rough notes come back as bullets that sound professional and say nothing I did not say. | Drafted bullets for the 20 synthetic cases have been read by hand. Every invented detail is logged in an issue with the prompt change that fixed it. |
 | L3 | 2 | As a student, I am warned when a bullet claims something I did not tell the app. | `factcheck.py` is measured on a hand-labeled set of at least 40 bullets (half with a planted invented claim). Its catch rate and false alarm rate are reported. |
 | L4 | 2 | As a student, invented claims made of ordinary words ("improved efficiency") are caught too. | An LLM-as-judge check is added alongside the rules, behind the same `unsupported_claims` interface, and measured on the L3 set. Its flags show up on the React Results page with no frontend change. |
@@ -93,7 +98,7 @@ Everyone: branch from `main`, open a pull request, get one review from the perso
 
 ## Web experience
 
-**Starting point.** The React app has every page of the "improve a draft" flow: Welcome, Upload (with preview), Incompatible, Loading, Results, History, and Prompts. The backend owner maintains the API calls and storage (`frontend/src/api/`, `history/`, `prompts/`); this area owns how the pages look and behave. The Streamlit app is still the only place with the Create questionnaire. Neither app has been clicked through in a browser.
+**Starting point.** The React app has every page of the "improve a draft" flow: Welcome, Upload (with preview), Incompatible, Loading, Results, History, and Prompts. The backend owner maintains the API calls and storage (`frontend/src/api/`, `history/`, `prompts/`); this area owns how the pages look and behave. The Streamlit app, and with it the Create questionnaire, was retired on Nov 28. `npm run e2e` checks every page in a browser, so extend it when you change a page.
 
 | # | Week | Story | Done when |
 | --- | --- | --- | --- |
@@ -104,7 +109,7 @@ Everyone: branch from `main`, open a pull request, get one review from the perso
 | W5 | 3 | As a presenter, the demo runs smoothly. | A scripted demo path with prepared resume files and saved job descriptions, loading states for every wait, and no raw error traces anywhere. |
 | W6 | 3 | As a student, I know where my resume goes and what's kept. | A notice before the first evaluation says the text goes to the LLM provider and that history stays on this device. The History page has a "Clear all my data" button. |
 | W7 | 3 | As a student on a phone or using a keyboard, the app still works. | Every page is checked at phone width and with keyboard only. The preview window and confirm dialogs work with Escape and Tab. |
-| W8 | stretch | As a student, I can build a resume from scratch in the React app. | The Create questionnaire is ported from Streamlit (needs a `POST /api/draft` route around `llm.draft_bullets`). Until then, Streamlit stays as the place to create from scratch, and the team decides by Nov 29 whether to keep or retire it. |
+| W8 | stretch | As a student, I can build a resume from scratch in the React app. | The Create questionnaire is rebuilt in React from the retired Streamlit version (`resume_maxxer/ui/create.py` in git history before Nov 28). Needs a `POST /api/draft` route around `llm.draft_bullets` (coordinate with the backend owner). Until then the app only improves existing drafts. |
 
 ## Evaluation and integration
 
@@ -160,6 +165,7 @@ Everyone: branch from `main`, open a pull request, get one review from the perso
 | Not enough job postings, or terms forbid using them | Untrained scoring still works, and TF-IDF is now secondary. Report it as a limitation rather than scraping against terms. |
 | A very large upload exhausts server memory | T8 adds parse limits. For the demo, run the server on a machine with spare RAM. |
 | A student clears their browser and loses history | History on the device is a deliberate privacy choice. W6 says so on screen. |
+| Retiring Streamlit dropped resume creation, which the tagline promises | Decide this week: give W8 an owner, or present creation as future work and say so on the slides. |
 | The before/after difference is small | Report it honestly. The human ratings (E3, E4, E9) say more than the automatic scores. |
 | Short week 2 | Feature freeze on Nov 29 holds even if a story slips. Unfinished stories move to stretch. |
 
@@ -173,5 +179,5 @@ Work a teammate did in an area they don't own, so credit is clear in the report.
 - **LLM and truthfulness:** added `llm.score_alignment` (the model-graded alignment score, -1 when unscorable) and its rubric prompt. Made `llm.is_configured` ignore the `.env.example` placeholder key, so copying the file without editing it doesn't break the app.
 - **Job matching:** set the 50-character minimum for job descriptions (`llm.MIN_JOB_DESCRIPTION_CHARS`). Kept the TF-IDF score as a secondary "wording overlap" number next to the model grade.
 - **Evaluation and integration:** added `alignment_before` and `alignment_after` columns to `evaluation/run_eval.py` (-1 rows left out of the mean), and made the run fail on a job description under 50 characters. Added `tests/test_backend.py` (alignment grading, pipeline, API).
-- **Web experience:** built every page of the React frontend, including the upload preview, History, and Prompts pages. The Streamlit app itself is unchanged and still uses TF-IDF only.
+- **Web experience:** built every page of the React frontend, including the upload preview, History, and Prompts pages, and the `npm run e2e` browser walkthrough. Retired the Streamlit app on Nov 28.
 - **Work plan:** re-scoped the unclaimed areas on Nov 27 to fit the React app, model-graded alignment, and on-device history.
